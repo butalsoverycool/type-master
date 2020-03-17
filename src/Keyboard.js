@@ -12,7 +12,7 @@ import Keys from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
 import './index.css';
 
-import { Ctx } from './State';
+import { Ctx, songs } from './State';
 
 const color = {
 	'1': '#eefae8',
@@ -22,32 +22,65 @@ const color = {
 
 const Container = styled.div`
 	width: 100%;
+	max-width: 900px;
+	text-align: center;
+	margin: auto;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: stretch;
+`;
+
+const Overview = styled.div`
+	background: #f6f6f6;
+`;
+
+const Material = styled.div`
+	background: #888;
+	color: #ddd;
+	height: 60px;
+	padding: 0;
+`;
+
+const Strip = styled.div`
+	position: relative;
+	height: 100%;
+	background: #333;
+
+	width: ${props => props.stripW}%;
+	text-align: left;
+	float: right;
+`;
+
+const Txt = styled.h3`
+	height: 100%;
+	line-height: 60px;
+	margin: auto;
+	position: absolute;
+`;
+
+const BoardContainer = styled.div`
+	width: 100%;
 	max-width: 700px;
 	min-width: 450px;
-	text-align: center;
 	margin: auto;
 
 	& .hg-button.active {
 		border-bottom: none;
 		border-top: 1px #e6e6e6 solid;
-		color: red;
-		background: red;
 	}
 
-	& .hg-button.active.stress-1 {
-		background: ${color['1']};
-	}
-
-	& .hg-button.active.stress-2 {
-		background: ${color['2']};
-	}
-
-	& .hg-button.active.stress-3 {
-		background: ${color['3']};
-	}
+	${props =>
+		props.stress &&
+		` 
+		& .hg-button.stress-${props.stress} {
+			background: ${color[props.stress]};
+		}
+	`};
 
 	& .hg-button.space {
 		flex: 18;
+		${props => !props.gameOn && 'font-weight: 700'};
 	}
 
 	& .hg-button.regular {
@@ -119,13 +152,13 @@ const btnClasses = ({ input, boardMode, stress }) => [
 	{
 		class: 'active',
 		buttons:
-			(input === ' ' ? '{space}' : input) + // pressed key
-			(boardMode === 'shift' ? '{shift} ' : '') + // inc shift/alt
-			(boardMode === 'alt' ? '{alt}' : '')
+			(input === ' ' ? '{space}' : !input ? ' ' : input) + // pressed key
+			(boardMode === 'shift' ? ' {shift} ' : '') + // inc shift/alt
+			(boardMode === 'alt' ? ' {alt}' : '')
 	},
 	{
 		class: `stress-${String(stress)}`,
-		buttons: input || '{space}'
+		buttons: input === ' ' ? '{space}' : !input ? ' ' : input
 	},
 	{
 		class: 'space',
@@ -176,44 +209,23 @@ const getKey = char => {
 	}
 };
 
-const origMaterial = 'Hej jag heter Kim!';
-
-let active = true;
-
-/* const initialState = {
-	boardMode: 'default'
-};
-
-const stateReducer = (state, action) => {
-	// if update unnecessary, bail
-	if (state[action.type] === action.payload) return state;
-
-	console.log('REDUCER...');
-
-	const newState = JSON.parse(JSON.stringify(state));
-
-	switch (action.type) {
-		case 'boardMode':
-			newState[action.type] = action.payload;
-			console.log(`changed ${action.type} to ${action.payload}`);
-			return newState;
-		default:
-			return state;
-	}
-}; */
+let timer = null;
 
 const Keyboard = props => {
-	//const [state, dispatch] = useReducer(stateReducer, initialState);
-	//const { boardMode } = state;
-
-	//const [boardMode, setboardMode] = useState('default');
 	const { state, dispatch } = useContext(Ctx);
-	const { boardMode, material, gameOn, input } = state;
+	const {
+		boardMode,
+		material,
+		gameOn,
+		input,
+		stripW,
+		count,
+		p,
+		stress,
+		time
+	} = state;
 
 	const [allKeys, setAllKeys] = useState(null);
-
-	const [count, setCount] = useState(0);
-	const [points, setPoints] = useState(0);
 
 	let inputEl = useRef(null);
 
@@ -221,24 +233,27 @@ const Keyboard = props => {
 		inputEl = node;
 	};
 
+	let materialRef = useRef(null);
+
+	const setMaterialRef = node => {
+		if (!node) return;
+		materialRef = node;
+
+		console.log('material-width', materialRef.offsetWidth);
+	};
+
 	useEffect(() => {
+		if (!material) return;
+
 		if (material.length < 1 && gameOn) {
-			alert('Master!');
+			alert(time + 's you Master!');
 			exitGame();
 		}
 	}, [input, material]);
 
 	const inputHandler = e => {
-		/* if (!gameOn) {
-			if (e.target.value !== ' ') {
-				return;
-			} else {
-				setGameOn(true);
-			}
-		} */
-
 		// count action
-		setCount(count => count + 1);
+		dispatch({ type: 'count', payload: count + 1 });
 
 		// input = last inputted char
 		let val = e.target.value[e.target.value.length - 1];
@@ -252,25 +267,18 @@ const Keyboard = props => {
 		// on type match
 		if (val === material[0]) {
 			// add point
-			setPoints(p => p + 1);
+			dispatch({ type: 'p', payload: p + 1 });
 
 			// shorten material
 			material.shift();
 			dispatch({ type: 'material', payload: material });
+
+			// shorten strip
+			dispatch({
+				type: 'stripW',
+				payload: stripW - 20 >= 100 ? stripW - 20 : 100
+			});
 		}
-
-		/* // highlight key
-		allKeys.forEach(el => {
-			el.style.color = 'black';
-		});
-
-		const key = document.querySelector(
-			`.react-simple-keyboard .hg-button[data-skbtn="${val}"]`
-		);
-
-		if (key) {
-			key.style.color = 'red';
-		} */
 	};
 
 	const initHandler = () => {
@@ -281,8 +289,13 @@ const Keyboard = props => {
 		setAllKeys(keys);
 	};
 
+	const tick = () => {
+		dispatch({ type: 'time', payload: time + 1 });
+	};
+
 	const startGame = () => {
 		console.log('Game started!');
+		dispatch({ type: 'input', payload: '' });
 		dispatch({ type: 'gameOn', payload: true });
 	};
 
@@ -290,10 +303,10 @@ const Keyboard = props => {
 		console.log('Game stopped!');
 		dispatch({ type: 'input', payload: '{space}' });
 		dispatch({ type: 'gameOn', payload: false });
+		clearInterval(timer);
 	};
 
 	const downHandler = e => {
-		console.log('gmae sttatus', gameOn);
 		switch (e.key) {
 			case 'Shift':
 				if (boardMode !== 'shift') {
@@ -311,6 +324,10 @@ const Keyboard = props => {
 			case ' ':
 				if (!gameOn) startGame();
 				break;
+			case 'Tab':
+				// keep focus on input while playing
+				/* if (gameOn) didnt work... */ e.preventDefault();
+				break;
 			default:
 				break;
 		}
@@ -322,12 +339,22 @@ const Keyboard = props => {
 			e.key === 'Alt' /* && boardMode !== 'default' not working...*/
 		) {
 			dispatch({ type: 'boardMode', payload: 'default' });
+		} else {
+			dispatch({ type: 'input', payload: '' });
 		}
 	};
 
 	useEffect(() => {
 		if (gameOn) {
 			inputEl.focus();
+
+			timer = window.setInterval(() => {
+				dispatch({ type: 'time' }); // <-- Change this line!
+			}, 1000);
+			return () => {
+				window.clearInterval(timer);
+				dispatch({ type: 'time', payload: 'reset' });
+			};
 		}
 	}, [gameOn]);
 
@@ -336,28 +363,65 @@ const Keyboard = props => {
 		window.addEventListener('keyup', upHandler);
 	}, []);
 
+	const songHandler = title => {
+		const res = songs
+			.filter(song => song.title === title)[0]
+			.lyrics.split('');
+		console.log(res);
+
+		dispatch({ type: 'material', payload: res });
+	};
+
 	return (
-		<Container className='Keyboard'>
-			<p>Keys pressed: {count}</p>
-			<p>Points: {points}</p>
-			<p>Accuracy: {Math.round((points / count || 0).toFixed(2) * 100)}%</p>
-			<h3>{gameOn ? `Type: ${material.join('')}` : ''}</h3>
-			<p>Game status: {JSON.stringify(gameOn)}</p>
+		<Container>
+			<Overview>
+				<p>Time: {time}</p>
+				<p>Keys pressed: {count}</p>
+				<p>P: {p}</p>
+				<p>Accuracy: {Math.round((p / count || 0).toFixed(2) * 100)}%</p>
 
-			<HiddenInput value={input} onChange={inputHandler} ref={setInputRef} />
+				<p>Game status: {JSON.stringify(gameOn)}</p>
 
-			<Keys
-				layout={layout}
-				layoutName={boardMode}
-				display={display(gameOn)}
-				mergeDisplay={true}
-				onRender={initHandler}
-				buttonTheme={btnClasses(state)}
-			/>
+				{songs.map((song, nth) => (
+					<button
+						key={song.title + '-' + nth}
+						onClick={() => songHandler(song.title)}
+					>
+						{song.title} ({song.artist})
+					</button>
+				))}
 
-			<p>
-				<i>Board: mac ({boardMode})</i>
-			</p>
+				<HiddenInput
+					value={input}
+					onChange={inputHandler}
+					ref={setInputRef}
+				/>
+			</Overview>
+
+			<Material ref={setMaterialRef}>
+				<Strip /* ref={setStripRef} */ stripW={stripW}>
+					<Txt>{gameOn ? `${material.join('')}` : ''}</Txt>
+				</Strip>
+			</Material>
+
+			<BoardContainer
+				className='Keyboard'
+				gameOn={gameOn}
+				stress={String(stress)}
+			>
+				<Keys
+					layout={layout}
+					layoutName={boardMode}
+					display={display(gameOn)}
+					mergeDisplay={true}
+					onRender={initHandler}
+					buttonTheme={btnClasses(state)}
+				/>
+
+				<p>
+					<i>Board: mac ({boardMode})</i>
+				</p>
+			</BoardContainer>
 		</Container>
 	);
 };
