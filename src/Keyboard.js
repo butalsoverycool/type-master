@@ -32,7 +32,24 @@ const Container = styled.div`
 `;
 
 const Overview = styled.div`
+	display: flex;
+	justify-content: stretch;
 	background: #f6f6f6;
+`;
+
+const Box = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: stretch;
+	flex: 1;
+
+	& > button {
+		flex: 1;
+		border: none;
+		outline: none;
+		margin: 5px;
+		cursor: pointer;
+	}
 `;
 
 const Material = styled.div`
@@ -45,11 +62,13 @@ const Material = styled.div`
 const Strip = styled.div`
 	position: relative;
 	height: 100%;
-	background: #333;
+	background: ${props => (props.gameOn ? '#333' : '#f6f6f6')};
 
 	width: ${props => props.stripW}%;
 	text-align: left;
 	float: right;
+
+	overflow: hidden;
 `;
 
 const Txt = styled.h3`
@@ -119,6 +138,12 @@ const BoardContainer = styled.div`
 
 const HiddenInput = styled.input`
 	opacity: 0;
+	width: 0;
+	height: 0;
+	border: none;
+	outline: none;
+	margin: 0;
+	padding: 0;
 `;
 
 const layout = {
@@ -375,21 +400,26 @@ const Keyboard = props => {
 	return (
 		<Container>
 			<Overview>
-				<p>Time: {time}</p>
-				<p>Keys pressed: {count}</p>
-				<p>P: {p}</p>
-				<p>Accuracy: {Math.round((p / count || 0).toFixed(2) * 100)}%</p>
+				<Box>
+					<p>Time: {time}</p>
+					<p>Keys pressed: {count}</p>
+					<p>P: {p}</p>
+					<p>Accuracy: {Math.round((p / count || 0).toFixed(2) * 100)}%</p>
 
-				<p>Game status: {JSON.stringify(gameOn)}</p>
+					<p>Game status: {JSON.stringify(gameOn)}</p>
+				</Box>
 
-				{songs.map((song, nth) => (
-					<button
-						key={song.title + '-' + nth}
-						onClick={() => songHandler(song.title)}
-					>
-						{song.title} ({song.artist})
-					</button>
-				))}
+				<Box>
+					<p>Pick a song</p>
+					{songs.map((song, nth) => (
+						<button
+							key={song.title + '-' + nth}
+							onClick={() => songHandler(song.title)}
+						>
+							{song.title} ({song.artist})
+						</button>
+					))}
+				</Box>
 
 				<HiddenInput
 					value={input}
@@ -399,7 +429,7 @@ const Keyboard = props => {
 			</Overview>
 
 			<Material ref={setMaterialRef}>
-				<Strip /* ref={setStripRef} */ stripW={stripW}>
+				<Strip /* ref={setStripRef} */ stripW={stripW} gameOn={gameOn}>
 					<Txt>{gameOn ? `${material.join('')}` : ''}</Txt>
 				</Strip>
 			</Material>

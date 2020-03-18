@@ -28,9 +28,11 @@ export const songs = [
 	}
 ];
 
+const rand = Math.floor(Math.random() * songs.length, songs.length - 1);
+
 export const initialState = {
 	boardMode: 'default',
-	material: null,
+	material: songs[rand].lyrics.split(''),
 	gameOn: false,
 	input: ' ',
 	stripW: 100,
