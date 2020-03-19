@@ -1,21 +1,21 @@
 import React from 'react';
+import styled from 'styled-components';
 import './App.css';
 import Title from './Title';
-import Keyboard from './Body';
-import { StateProvider } from './State';
+
+import Game from './Game';
+
+const AppHeader = styled.header``;
 
 function App() {
 	return (
-		<StateProvider>
-			<div className='App'>
-				<header className='App-header'>
-					<Title />
-				</header>
-				<div>
-					<Keyboard />
-				</div>
-			</div>
-		</StateProvider>
+		<div className='App'>
+			<AppHeader className='App-header'>
+				<Title />
+			</AppHeader>
+
+			<Game />
+		</div>
 	);
 }
 

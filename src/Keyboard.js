@@ -1,10 +1,4 @@
-import React, {
-	useState,
-	useEffect,
-	useRef,
-	useReducer,
-	useContext
-} from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 /* import keyboard from './resources/swedishKeyboardMac.png'; */
 import styled from 'styled-components';
 
