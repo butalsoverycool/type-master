@@ -10,7 +10,17 @@ import { Container, HiddenInput } from './style';
 const Keyboard = () => {
 	// subscribe to game ctx
 	const { state, funcs, dispatch } = useContext(GameCtx);
-	const { boardMode, gameOn, stress, typeCount, p, material, input } = state;
+	const {
+		boardMode,
+		gameOn,
+		stress,
+		typeCount,
+		p,
+		material,
+		typed,
+		notTyped,
+		input
+	} = state;
 	const { startGame, endGame } = funcs;
 
 	// on keyboard init
@@ -20,21 +30,15 @@ const Keyboard = () => {
 
 	// input ref
 	let inputEl = useRef(null);
-	const setInputRef = node => {
-		inputEl = node;
-	};
 
-	// on gameOn-change
 	useEffect(() => {
-		// on game started
-		if (gameOn) {
-			// focus on hidden input to get typed
-			if (inputEl) inputEl.focus();
-		}
+		console.log('curr game status', gameOn);
 	}, [gameOn]);
 
 	// type handler
 	const inputHandler = e => {
+		if (!gameOn) return;
+
 		// update typeCount
 		dispatch({ type: 'typeCount', payload: typeCount + 1 });
 
@@ -49,14 +53,18 @@ const Keyboard = () => {
 
 		dispatch({ type: 'input', payload: input });
 
+		console.log('input', input);
 		// on type match
-		if (input === material[0]) {
+		if (input === notTyped[0]) {
+			console.log('match!');
 			// add point
 			dispatch({ type: 'p', payload: p + 1 });
 
+			//update typed-state
+			dispatch({ type: 'typed', payload: typed + input });
+
 			// shorten material
-			material.substring(1);
-			dispatch({ type: 'material', payload: material });
+			dispatch({ type: 'notTyped', payload: material.txt.substring(1) });
 		}
 	};
 
@@ -81,7 +89,10 @@ const Keyboard = () => {
 				break;
 			// space starts game (if !gameOn)
 			case ' ':
-				if (!gameOn) startGame();
+				if (state.gameOn === false) {
+					inputEl.current.focus();
+					startGame();
+				}
 				break;
 			// prevent tabbing away from hidden input
 			case 'Tab':
@@ -113,11 +124,16 @@ const Keyboard = () => {
 		// listen to keyboard
 		window.addEventListener('keydown', downHandler);
 		window.addEventListener('keyup', upHandler);
-	}, []);
+
+		return () => {
+			window.removeEventListener('keydown', downHandler);
+			window.removeEventListener('keyup', upHandler);
+		};
+	}, [state]);
 
 	return (
 		<Container className='Keyboard' gameOn={gameOn} stress={String(stress)}>
-			<HiddenInput value={input} onChange={inputHandler} ref={setInputRef} />
+			<HiddenInput value={input} onChange={inputHandler} ref={inputEl} />
 
 			<Keys
 				layout={layout}

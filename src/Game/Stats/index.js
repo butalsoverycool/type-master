@@ -28,15 +28,21 @@ const Box = styled.div`
 const Stats = () => {
 	// subscribe to game ctx
 	const { state, funcs, dispatch } = useContext(GameCtx);
-	const { gameOn, time, typeCount, p, input, material } = state;
+	const {
+		gameOn,
+		time,
+		typeCount,
+		p,
+		input,
+		material,
+		typed,
+		notTyped
+	} = state;
 	const { endGame } = funcs;
 
 	// handle material pick
-	const materialHandler = title => {
-		const res = songs
-			.filter(song => song.title === title)[0]
-			.lyrics.split('');
-		console.log(res);
+	const setNewMaterial = title => {
+		const res = songs.filter(song => song.title === title)[0];
 
 		dispatch({ type: 'material', payload: res });
 	};
@@ -44,8 +50,9 @@ const Stats = () => {
 	// fx
 	useEffect(() => {
 		if (!material) return;
+		if (!material.txt) return;
 
-		if (material.length < 1 && gameOn) {
+		if (gameOn && typed.length > 0 && notTyped.length < 1) {
 			alert(time + 's you Master!');
 			endGame();
 		}
@@ -62,7 +69,16 @@ const Stats = () => {
 				<p>P: {p}</p>
 				<p>Accuracy: {accuracy}%</p>
 
+				<p>Typed: {typed.length}</p>
+				<p>Not typed: {notTyped.length}</p>
+
 				<p>Game status: {JSON.stringify(gameOn)}</p>
+
+				<p>
+					<i>
+						<b>{material.txt}</b>
+					</i>
+				</p>
 			</Box>
 
 			<Box>
@@ -70,7 +86,7 @@ const Stats = () => {
 				{songs.map((song, nth) => (
 					<button
 						key={song.title + '-' + nth}
-						onClick={() => materialHandler(song.title)}
+						onClick={() => setNewMaterial(song.title)}
 					>
 						{song.title} ({song.artist})
 					</button>

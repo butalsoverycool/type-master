@@ -13,17 +13,18 @@ const Container = styled.div``;
 
 const Game = () => {
 	const [state, dispatch] = useReducer(stateUpdater, initialState);
-	const { time } = state;
 
 	let timer = null;
 
 	// start game
 	const startGame = () => {
-		console.log('Game started!');
+		console.log('Game started...');
+
 		dispatch({
 			type: 'input',
 			payload: ''
 		});
+
 		dispatch({
 			type: 'gameOn',
 			payload: true
