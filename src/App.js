@@ -1,21 +1,30 @@
 import React from 'react';
 import styled from 'styled-components';
 import './App.css';
+
+import State from './State';
 import Title from './Title';
 
-import Game from './Game';
+import Timer from './Timer';
+
+//import Game from './Game';
 
 const AppHeader = styled.header``;
 
 function App() {
 	return (
-		<div className='App'>
-			<AppHeader className='App-header'>
-				<Title />
-			</AppHeader>
+		<State>
+			<div className='App'>
+				<AppHeader className='App-header'>
+					<Title />
+				</AppHeader>
 
-			<Game />
-		</div>
+				<div className='game-container'>
+					<Timer />
+				</div>
+				{/* <Game /> */}
+			</div>
+		</State>
 	);
 }
 

@@ -3,8 +3,9 @@ import styled from 'styled-components';
 
 import stateUpdater, { initialState } from './state';
 import Stats from './Stats';
-import Material from './Material';
+import Material from './material';
 import Keyboard from './Keyboard';
+import Timer from 'react-compound-timer';
 
 // ctx
 export const GameCtx = createContext(initialState);
@@ -22,22 +23,22 @@ const Game = () => {
 
 		dispatch({
 			type: 'input',
-			payload: ''
+			payload: '',
 		});
 
 		dispatch({
 			type: 'gameOn',
-			payload: true
+			payload: true,
 		});
 
 		dispatch({
 			type: 'time',
-			payload: 'reset'
+			payload: 'reset',
 		});
 
 		timer = setInterval(() => {
 			dispatch({
-				type: 'time'
+				type: 'time',
 			});
 		}, 1000);
 	};
@@ -47,11 +48,11 @@ const Game = () => {
 		console.log('Game stopped!');
 		dispatch({
 			type: 'input',
-			payload: '{space}'
+			payload: '{space}',
 		});
 		dispatch({
 			type: 'gameOn',
-			payload: false
+			payload: false,
 		});
 
 		clearInterval(timer);
@@ -60,23 +61,23 @@ const Game = () => {
 	const funcs = {
 		startGame,
 		endGame,
-		timer
+		timer,
 	};
 
 	return (
-		<GameCtx.Provider
+		/* <GameCtx.Provider
 			value={{
 				state,
 				funcs,
-				dispatch
+				dispatch,
 			}}
-		>
-			<Container className='Game'>
-				<Stats />
+		> */
+		<Container className='Game'>
+			{/* <Stats />
 				<Material />
-				<Keyboard />
-			</Container>
-		</GameCtx.Provider>
+				<Keyboard /> */}
+		</Container>
+		/* </GameCtx.Provider> */
 	);
 };
 

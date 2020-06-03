@@ -1,6 +1,17 @@
 import React, { createContext, useReducer } from 'react';
+import { RecoilRoot } from 'recoil';
 
-const rand = Math.floor(Math.random() * songs.length, songs.length - 1);
+import * as atoms from './atoms';
+import * as selectors from './selectors';
+
+const State = ({ children, ...props }) => {
+	return <RecoilRoot>{children}</RecoilRoot>;
+};
+
+export default State;
+export { atoms, selectors };
+
+/* const rand = Math.floor(Math.random() * songs.length, songs.length - 1);
 
 export const initialState = {
 	boardMode: 'default',
@@ -11,7 +22,7 @@ export const initialState = {
 	count: 0,
 	p: 0,
 	stress: 1,
-	time: 0
+	time: 0,
 };
 
 // State updater
@@ -36,7 +47,7 @@ const stateReducer = (state, action) => {
 
 const gameCtx = createContext(initialState);
 
-export const gameStateProvider = props => {
+export const gameStateProvider = (props) => {
 	const [state, dispatch] = useReducer(stateReducer, initialState);
 
 	return (
@@ -47,7 +58,7 @@ export const gameStateProvider = props => {
 	);
 };
 
-export const withGameState = Component => props => (
+export const withGameState = (Component) => (props) => (
 	<gameCtx.Consumer>
 		{(state, dispatch) => (
 			<Component {...props} state={state} dispatch={dispatch} />
@@ -55,4 +66,4 @@ export const withGameState = Component => props => (
 	</gameCtx.Consumer>
 );
 
-export default gameCtx;
+export default gameCtx; */
